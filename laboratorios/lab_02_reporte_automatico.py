@@ -14,22 +14,38 @@ Instrucciones:
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.dates as mdates  # Importación adicional
 
 # 1. Cargar y limpiar los datos
 archivo_entrada = '../datos/datos_produccion_automatizada_grande.csv'
 df = pd.read_csv(archivo_entrada)
 df = df.drop_duplicates().dropna()
+df['fecha'] = pd.to_datetime(df['fecha'])  # Asegurar que la fecha esté en formato datetime
 
 # 2. Resumen estadístico
 resumen = df.describe()
 
 # 3. Gráfico de producción
+df_filtrado = df[df['fecha'] >= '2022-01-01']  # Filtrar desde 2022
+
 plt.figure(figsize=(10, 6))
-sns.lineplot(data=df, x='fecha', y='produccion_bpd')
-plt.title('Producción a lo largo del tiempo')
-plt.xlabel('Fecha')
-plt.ylabel('Producción')
-plt.xticks(rotation=45)
+sns.lineplot(data=df_filtrado, x='fecha', y='produccion_bpd')
+plt.title('Producción a lo largo del tiempo (desde 2022)')
+plt.xlabel('Año')
+plt.ylabel('Producción (BPD)')
+
+# Mostrar solo los años en el eje X
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+plt.gca().xaxis.set_major_locator(mdates.YearLocator(1))  # Mostrar cada año
+plt.xticks(rotation=0)
+
+plt.tight_layout()
+plt.savefig('../datos/grafico_produccion.png')  # Guardar gráfico
+# Mostrar solo los años en el eje X
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+plt.gca().xaxis.set_major_locator(mdates.YearLocator(1))  # Cada 1 años
+plt.xticks(rotation=0)
+
 plt.tight_layout()
 plt.savefig('../datos/grafico_produccion.png')  # Guardar gráfico
 
@@ -59,3 +75,8 @@ with open('../datos/reporte_produccion.html', 'w') as f:
     f.write(html)
 
 print("✅ Reporte generado en Excel y HTML.")
+
+# 6. Exportar la gráfica en PDF
+plt.savefig('../datos/grafico_produccion.pdf')   # Guardar como PDF
+
+print("✅ Reporte generado en Excel, HTML y gráfica exportada a PDF.")
